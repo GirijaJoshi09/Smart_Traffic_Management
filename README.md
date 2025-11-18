@@ -1,57 +1,117 @@
 # Smart Traffic Optimizer — Machine Learning Based Traffic Prediction System
 
-This project is a Machine Learning–based Smart Traffic Optimization System designed to predict Signal Time, Vehicle Flow, Accident Risk, and Traffic Clusters (K-Means).
-It includes accuracy evaluation, interactive dashboard graphs, and MySQL-backed prediction logging.
+This project is a Machine Learning–based Smart Traffic Optimization System designed to predict Signal Time, Vehicle Flow, Accident Risk, and Traffic Clusters using real-time and historical traffic inputs.
+The system integrates an Emergency Vehicle Priority mechanism, accident interval analysis, dashboard visualizations, and MySQL-backed prediction logging.
 
 ---
 
 ## Features
 
-### 1. Signal Time Prediction
+### 1. Signal Time Prediction (Linear Regression)
 
-Predicts optimal green signal duration based on real-time traffic data.
-Outputs:
+Predicts the optimal green signal duration based on:
+
+* Traffic volume
+* Vehicle distribution
+* Average vehicle speed
+* Hour of the day
+* Weather impact
+
+**Outputs:**
 
 * Optimal Signal Time
-* Model Accuracy (%)
 * Confidence Score
+* Prediction Accuracy
 
-### 2. Vehicle Flow Prediction
+---
 
-Forecasts upcoming traffic volume using speed, density, and weather variables.
-Outputs:
+### 2. Vehicle Flow Prediction (Multiple Linear Regression)
+
+Predicts upcoming traffic volume using:
+
+* Average speed
+* Temperature
+* Humidity
+* Traffic volume
+
+**Outputs:**
 
 * Vehicles per hour
-* Model Accuracy (%)
-* Predicted Change in Traffic Flow
+* Confidence Score
+* Variations in predicted flow
 
-### 3. Accident Risk Prediction
+---
 
-Predicts the probability of an accident using traffic and weather features.
-Outputs:
+### 3. Accident Risk Prediction (Logistic Regression)
+
+Estimates accident probability using:
+
+* Speed variations
+* Vehicle density
+* Weather conditions
+* Time of the day
+
+**Outputs:**
 
 * Accident Probability
-* Risk Level (High / Medium / Low)
-* Confidence Score
+* Risk Level (Low / Medium / High)
+* Classification Confidence
 
-### 4. Traffic Clustering (K-Means)
+---
 
-Clusters traffic conditions into:
+### 4. Traffic Clustering (K-Means Clustering)
 
-* Low Traffic
-* Medium Traffic
-* High Traffic
+Groups traffic conditions into:
 
-### 5. Interactive Dashboard
+* Low congestion
+* Medium congestion
+* High congestion
 
-The interface displays:
+This helps identify traffic patterns and peak congestion times.
+
+---
+
+### 5. Interactive Analytical Dashboard
+
+The dashboard includes:
 
 * Signal Time Trend Chart
 * Vehicle Flow Trend Chart
-* Vehicle Distribution Pie Chart
 * Accident Reports Over Time
-* Traffic Cluster Visualizations
-* Real-time model accuracy for every prediction
+* Vehicle Distribution Pie Chart
+* Prediction Activity Chart
+* Accident-Prone Interval Chart (based on weather and time)
+* Real-time prediction accuracy indicators
+
+---
+
+## Changes Made During Final Evaluation
+
+### 1. Accident Risk Interval Chart (Based on Historical Data + Weather)
+
+A new accident analytics module was added that processes historical traffic records to generate:
+
+* Accident frequency for each hourly interval (0–23)
+* Weather-wise accident distribution
+* A line chart displaying accident-prone intervals
+
+This addition allows the system to highlight high-risk time periods under different weather conditions, improving predictive decision-making.
+
+---
+
+### 2. Emergency Vehicle Priority System
+
+An emergency override mechanism was implemented to prioritize urgent vehicles such as ambulances, fire brigades, and police vehicles.
+
+**Working:**
+
+* User selects "Emergency Active" from the UI.
+* The system reads the standard predicted green signal time.
+* A controlled override is applied by adding additional green time (20–30 seconds).
+* Minimum green-time safety checks are maintained.
+* All emergency-triggered overrides are logged in MySQL with flags and metadata.
+
+This ensures faster clearance for emergency vehicles without disrupting the prediction model.
 
 ---
 
@@ -62,17 +122,17 @@ The interface displays:
 | Signal Time Prediction   | Linear Regression          |
 | Vehicle Flow Prediction  | Multiple Linear Regression |
 | Accident Risk Prediction | Logistic Regression        |
-| Traffic Clustering       | K-Means                    |
+| Traffic Clustering       | K-Means Clustering         |
 
 ---
 
 ## Tech Stack
 
 **Backend:** Python, Flask, Scikit-Learn, Pandas, NumPy
-**Frontend:** HTML, CSS, JavaScript
+**Frontend:** HTML, CSS, JavaScript, Chart.js
 **Database:** MySQL
 **Model Storage:** Joblib
-**Visualization:** Custom JavaScript charts and analytical dashboard
+**Visualization:** JavaScript analytics charts
 
 ---
 
@@ -80,15 +140,16 @@ The interface displays:
 
 ```
 ├── src/
-│   ├── app.py                 # Flask application
-│   ├── train.py               # Training of all ML models with metadata
-│   ├── models_helper.py       # Prediction + accuracy computation
-│   ├── routes/                # API endpoints
-│   ├── templates/             # Frontend HTML files
-│   └── static/                # CSS and JS files
+│   ├── app.py                  # Main Flask application
+│   ├── train.py                # Training script for all ML models
+│   ├── models_helper.py        # Prediction + confidence + accuracy logic
+│   ├── priority_manager.py     # Emergency override logic
+│   ├── routes/                 # API routing modules
+│   ├── templates/              # Frontend HTML templates
+│   └── static/                 # CSS, JS, assets
 │
-├── models/                    # Trained models and metadata files
-├── data/                      # Dataset used for training
+├── models/                     # Trained ML models and metadata
+├── data/                       # Dataset used for training
 └── README.md
 ```
 
@@ -102,22 +163,22 @@ The interface displays:
 pip install -r requirements.txt
 ```
 
-### Step 2: Train all Machine Learning models
+### Step 2: Train all ML models
 
 ```bash
 python src/train.py
 ```
 
-### Step 3: Start the Flask server
+### Step 3: Start the application
 
 ```bash
 python src/app.py
 ```
 
-### Step 4: Open the dashboard
+### Step 4: Open dashboard in browser
 
 ```
-http://127.0.0.1:5000
+http://127.0.0.1:5000/
 ```
 
 ---
@@ -126,32 +187,29 @@ http://127.0.0.1:5000
 
 * Signal Time Prediction Accuracy: 80% – 90%
 * Vehicle Flow Prediction Accuracy: 70% – 85%
-* Accident Risk Classification Accuracy: 85% – 90%
-* K-Means clustering successfully categorizes traffic into low, medium, and high congestion levels
+* Accident Classification Accuracy: 85% – 90%
+* K-Means clustering successfully identifies congestion levels
 
-The dashboard visualizes trends using:
+The dashboard provides:
 
-* Signal time predictions
-* Flow rate variations
-* Accident probability
-* Traffic clusters
-* Model accuracy for each output
+* Real-time prediction insights
+* Historical analytics
+* Emergency override detection
+* Performance visualizations
 
 ---
 
-## Future Enhancements
+## Future Scope
 
-* Integration with real-time IoT traffic sensors
-* Deep Learning (LSTM) models for time-series forecasting
-* Real-time adaptive traffic signal control
-* Multi-junction coordinated traffic optimization
+* Integration with live IoT traffic sensors
+* Deep Learning (LSTM) for time-series traffic forecasting
+* Multi-junction adaptive traffic control
+* AI-based automatic emergency vehicle detection using GPS
 
 ---
 
 ## Contributors
 
-* **Gauri Bankar**
-* **Manasi Jog**
-* **Girija Joshi**
-
-Just tell me, Girija Darling.
+* Gauri Bankar
+* Manasi Jog
+* Girija Joshi
